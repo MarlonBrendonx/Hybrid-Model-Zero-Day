@@ -115,7 +115,6 @@ for i, class_name in enumerate(le.classes_):
 
 
 y_true_bin = []
-# y_true_bin = [0 if y == 6 else 1 for y in y_true]
 
 
 # 4.2 ordinal-encode as categóricas (cada valor vira um inteiro)
@@ -133,7 +132,7 @@ print("Dimensão de X após encoding:", X_proc.shape)
 
 feature_names = X_proc.columns.tolist()
 
-# Cria uma máscara booleana onde a classe não é 4 nem 5
+# Cria uma máscara booleana onde a classe não é 0 nem 8
 mask = ~np.isin(y_true, ZERO_DAY_CLASSES)
 mask2 = np.isin(y_true, ZERO_DAY_CLASSES)
 
@@ -158,8 +157,6 @@ _, contagens = np.unique(y_test, return_counts=True)
 
 X_zero_day_sample = X_zero_day.iloc[:max(contagens)] 
 y_zero_day_sample = y_zero_day[:max(contagens)]
-
-pdb.set_trace()
 
 metric = metrics.ROCAUC()
 
@@ -186,8 +183,6 @@ classifierModel = compose.Pipeline(
 X_train = X_train.reset_index(drop=True).values
 X_test = X_test.reset_index(drop=True).values
 
-# y_train = y_train.reset_index(drop=True)
-# y_test = y_test.reset_index(drop=True)
 
 y_true = y_test
 y_pred = []
