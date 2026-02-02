@@ -23,69 +23,29 @@ from sklearn.metrics import classification_report, roc_auc_score
 from river import ensemble
 from river import tree
 import pickle
+import pdb
 import random
 
-######### Constantes
 NORMAL_CLASS = -1
 ZERO_DAY_CLASSES = []
 ZERO_DAY = 9
 KNOW_CLASSES = []
 
 # Carregar o arquivo CSV
-df = pd.read_csv("ERENO-2.0-100K.csv", low_memory=False)
+df = pd.read_csv("DNN-EdgeIIoT-dataset.csv", low_memory=False)
 
-best = [
-    "Time",
-    "isbA",
-    "isbB",
-    "isbC",
-    "vsbA",
-    "vsbB",
-    "vsbC",
-    "isbARmsValue",
-    "isbBRmsValue",
-    "isbCRmsValue",
-    "vsbARmsValue",
-    "vsbBRmsValue",
-    "vsbCRmsValue",
-    "isbATrapAreaSum",
-    "isbBTrapAreaSum",
-    "isbCTrapAreaSum",
-    "vsbATrapAreaSum",
-    "vsbBTrapAreaSum",
-    "vsbCTrapAreaSum",
-    "t",
-    "GooseTimestamp",
-    "SqNum",
-    "StNum",
-    "cbStatus",
-    "gooseTimeAllowedtoLive",
-    "confRev",
-    "APDUSize",
-    "stDiff",
-    "sqDiff",
-    "cbStatusDiff",
-    "timestampDiff",
-    "tDiff",
-    "timeFromLastChange",
-    "delay",
-]
-
-best.append("class")
-
-df = df[best]
-
+targetClass = "Attack_type"
 
 df = (
-    df.groupby("class")
+    df.groupby(targetClass)
     .apply(lambda x: x.sample(min(len(x), 20000), random_state=42))
-    .sort_values(by="Time")  # ou qualquer coluna estável
+    .sort_index()  # ou qualquer coluna estável
     .reset_index(drop=True)
 )
 
 # tenta converter cada coluna para numérico; se não der, deixa como está
 for col in df.columns:
-    if col == "class":
+    if col == targetClass:
         continue
     df[col] = pd.to_numeric(df[col], errors="ignore")
 
@@ -93,8 +53,8 @@ print("DTypes finais:\n", df.dtypes.value_counts())
 
 # ------------------ 2. Separação de X e y ------------------
 df = df.reset_index(drop=True)
-y = df["class"].astype(str)  # string para o label encoder
-X = df.drop(columns=["class"])
+y = df[targetClass].astype(str)  # string para o label encoder
+X = df.drop(columns=[targetClass])
 
 
 # ------------------ 3. Identificação de numérico vs categórico ------------------
@@ -125,8 +85,8 @@ for i, class_name in enumerate(le.classes_):
 
 # ZERO_DAY_CLASSES = random.sample(KNOW_CLASSES, 1)
 
-# ZERO_DAY_CLASSES = random.sample(KNOW_CLASSES, 2)
-ZERO_DAY_CLASSES = [0, 8]
+ZERO_DAY_CLASSES = random.sample(KNOW_CLASSES, 2)
+# ZERO_DAY_CLASSES = [0, 8]
 KNOW_CLASSES = [value for value in KNOW_CLASSES if value not in ZERO_DAY_CLASSES]
 
 
